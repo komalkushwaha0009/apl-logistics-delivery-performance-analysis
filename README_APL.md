@@ -19,12 +19,10 @@ Only **18.6%** of orders are delivered exactly on schedule; **57.3%** are late. 
 
 ```
 ├── data/                    Cleaned dataset used by both dashboards
-├── notebooks/               Data cleaning, KPI computation, and chart generation scripts
 ├── dashboard/
 │   ├── streamlit_app/       Interactive Python/Streamlit dashboard
 │   └── powerbi/             Power BI Desktop (.pbix) dashboard
-├── docs/                    Research paper, executive summary, and dashboard screenshots
-└── figures/                 Static charts used in the research paper
+└── docs/                    Research paper and executive summary (PDF)
 ```
 
 ## Dashboards
@@ -33,9 +31,17 @@ Only **18.6%** of orders are delivered exactly on schedule; **57.3%** are late. 
 ```bash
 cd dashboard/streamlit_app
 pip install -r requirements.txt
+```
+The dataset is stored compressed at `data/cleaned_data.csv.gz` to stay under GitHub's upload limits. Unzip it first, then copy it into the same folder as `app.py`:
+```bash
+gunzip -k data/cleaned_data.csv.gz          # -k keeps the original .gz file too
+cp data/cleaned_data.csv dashboard/streamlit_app/
 streamlit run app.py
 ```
-Requires `data/cleaned_data.csv` to be copied into the same folder as `app.py` (or update `DATA_PATH` in the script).
+On Windows (PowerShell), use Expand-Archive or any zip tool instead of `gunzip`, since gzip isn't a built-in command:
+```powershell
+python -c "import gzip,shutil; shutil.copyfileobj(gzip.open('data/cleaned_data.csv.gz','rb'), open('data/cleaned_data.csv','wb'))"
+```
 
 ### Power BI
 Open `dashboard/powerbi/APL_Logistics_Dashboard.pbix` in Power BI Desktop. Data is embedded, so no additional setup is required.
@@ -49,11 +55,7 @@ Open `dashboard/powerbi/APL_Logistics_Dashboard.pbix` in Power BI Desktop. Data 
 3. **KPI computation** — on-time rate, late delivery risk ratio, shipping-mode efficiency, regional/market diagnostics, customer-segment impact.
 4. **Diagnostics** — isolated shipping mode as the dominant driver of delay risk versus geography, market, and customer segment.
 
-Full methodology and findings are in [`docs/Research_Paper.docx`](docs/Research_Paper.docx); a condensed version is in [`docs/Executive_Summary.docx`](docs/Executive_Summary.docx).
-
-## Dataset
-
-Source data matches the schema of the public DataCo Smart Supply Chain dataset (order, shipping, customer, and product fields). See `data/cleaned_data.csv` for the cleaned version used in this analysis, or the [`notebooks/`](notebooks/) scripts for the full cleaning pipeline.
+Full methodology and findings are in [`docs/Research_Paper.pdf`](docs/Research_Paper.pdf); a condensed version is in [`docs/Executive_Summary.pdf`](docs/Executive_Summary.pdf).
 
 ## Recommendations
 
