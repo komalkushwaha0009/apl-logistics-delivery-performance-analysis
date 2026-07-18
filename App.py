@@ -299,5 +299,5 @@ with tabs[3]:
 st.markdown("---")
 st.caption(
     "APL Logistics (KWE Group) · Delivery Performance, Delay Risk & Logistics Efficiency Analysis "
-    "· Unified Mentor Data Analytics Internship Project"
+    "· Unified Mentor Data Science Internship Project"
 )
