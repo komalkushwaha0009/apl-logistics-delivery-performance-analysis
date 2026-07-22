@@ -9,6 +9,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
+import gzip
+import shutil
 
 # ----------------------------------------------------------------------------
 # CONFIG
@@ -19,7 +22,8 @@ st.set_page_config(
     layout="wide",
 )
 
-DATA_PATH = "cleaned_data.csv"   # place cleaned_data.csv next to this file
+DATA_PATH = "cleaned_data.csv"
+DATA_PATH_GZ = "cleaned_data.csv.gz"
 
 COLOR_MAP = {"On-time": "#2E86AB", "Delayed": "#E63946", "Early": "#6BAA75"}
 
@@ -27,16 +31,21 @@ COLOR_MAP = {"On-time": "#2E86AB", "Delayed": "#E63946", "Early": "#6BAA75"}
 # DATA LOADING
 # ----------------------------------------------------------------------------
 @st.cache_data
-def load_data(path):
+def load_data(path, gz_path):
+    # Auto-decompress on first run (e.g. on Streamlit Cloud, where only the
+    # compressed file is committed to keep the repo small).
+    if not os.path.exists(path) and os.path.exists(gz_path):
+        with gzip.open(gz_path, "rb") as f_in, open(path, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
     df = pd.read_csv(path)
     return df
 
 try:
-    df_raw = load_data(DATA_PATH)
+    df_raw = load_data(DATA_PATH, DATA_PATH_GZ)
 except FileNotFoundError:
     st.error(
-        f"Could not find `{DATA_PATH}`. Place the cleaned dataset "
-        f"(cleaned_data.csv, produced by 01_clean_data.py) in the same folder as this app."
+        f"Could not find `{DATA_PATH}` or `{DATA_PATH_GZ}`. Place the cleaned dataset "
+        f"(produced by 01_clean_data.py) in the same folder as this app."
     )
     st.stop()
 
@@ -299,5 +308,5 @@ with tabs[3]:
 st.markdown("---")
 st.caption(
     "APL Logistics (KWE Group) · Delivery Performance, Delay Risk & Logistics Efficiency Analysis "
-    "· Unified Mentor Data Science Internship Project"
+    "· Unified Mentor Data Analytics Internship Project"
 )
