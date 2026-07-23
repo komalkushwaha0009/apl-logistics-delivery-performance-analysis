@@ -34,9 +34,20 @@ COLOR_MAP = {"On-time": "#2E86AB", "Delayed": "#E63946", "Early": "#6BAA75"}
 def load_data(path, gz_path):
     # Auto-decompress on first run (e.g. on Streamlit Cloud, where only the
     # compressed file is committed to keep the repo small).
-    if not os.path.exists(path) and os.path.exists(gz_path):
+    # Check file SIZE, not just existence — a previous failed run can leave
+    # behind an empty/partial file at `path`, which would otherwise be
+    # treated as "already decompressed" forever.
+    needs_decompress = (not os.path.exists(path)) or os.path.getsize(path) == 0
+    if needs_decompress:
+        if not os.path.exists(gz_path):
+            raise FileNotFoundError(gz_path)
         with gzip.open(gz_path, "rb") as f_in, open(path, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
+        if os.path.getsize(path) == 0:
+            raise ValueError(
+                f"Decompressed '{path}' is empty — '{gz_path}' itself may be "
+                f"corrupted or truncated. Re-upload the .gz file."
+            )
     df = pd.read_csv(path)
     return df
 
